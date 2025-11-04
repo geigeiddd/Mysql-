@@ -1,0 +1,89 @@
+1.    列出不在'22'号学院工作的所有副教授的信息。
+SELECT *
+FROM t
+WHERE collnum!='22' AND ttitle='副教授';
+2.    查询考试成绩有不及格的学生的学号。
+SELECT DISTINCT snum
+FROM sc
+WHERE score<60;
+3.    列出月工资在[7000,9000]的教师信息。
+SELECT *
+FROM t
+WHERE tsalary<=9000 AND tsalary>=7000;
+4.    列出职称是副教授或工程师或教授的教师信息。
+SELECT *
+FROM t
+WHERE ttitle='副教授' OR ttitle='工程师' OR ttitle='教授';
+5.    列出1970年1月1日前出生，目前工资低于7000元或高于8000元的教师信息。
+SELECT *
+FROM t
+WHERE tbirth<'1970-01-01' AND (tsalary<7000 OR tsalary>8000);
+6.    查询电话号码为NULL的教师信息。
+SELECT *
+FROM t
+WHERE tphone IS NULL;
+7.    询学生表中籍贯包含'北京市'或'上海市'的学生。
+SELECT *
+FROM s
+WHERE sorigin LIKE'北京市' OR sorigin LIKE '上海市';
+8.    查询姓欧阳，名字为单字的学生信息。
+SELECT *
+FROM s
+WHERE sname LIKE '欧阳_';
+9.    从学生表中查出名字第2个字是'小'或'大' 的学生资料。
+SELECT *
+FROM s
+WHERE sname LIKE '_小_' OR sname LIKE '_大_';
+10.   查询出学生电话号码中含有_(下划线)的记录。
+SELECT *
+FROM s
+WHERE sphone LIKE'%/_%' ESCAPE'/';
+11.   查全体学生的姓名及其出生年份，并显示前10条记录。
+SELECT sname,sbirth
+FROM s
+LIMIT 10;
+12.   统计男女学生人数。
+SELECT ssex,COUNT(*)'人数'
+FROM s
+GROUP BY ssex;
+13.   查询学生人数超过1000人的专业及人数。
+SELECT dnum,COUNT(dnum)'ddnum'
+FROM s
+GROUP BY dnum
+HAVING COUNT(dnum)>1000;
+14.   查询平均年龄大于30岁的专业。
+SELECT dnum
+FROM s
+GROUP BY dnum
+HAVING AVG(extract(year from current_date)-extract(year from sbirth))>30;
+15.   查询平均成绩大于等于90分的学生学号和平均成绩。
+SELECT snum,AVG(score)
+FROM sc
+GROUP BY snum
+HAVING AVG(score)>=90;
+16.   查询各个课程号及相应的选课人数，并按选课人数降序排列。
+SELECT  dnum,COUNT(dnum)'ddnum'
+FROM s
+GROUP BY dnum
+ORDER BY ddnum DESC;
+17.   查询所有课程成绩都90分以上，并且选课数量达到50门以上的学生学号和选课数，并按照选课数降序排列。
+SELECT snum,COUNT(cnum)'ccnum'
+FROM sc
+WHERE score>90
+GROUP BY snum
+HAVING COUNT(cnum)>50 
+ORDER BY ccnum DESC;
+18.   在教师表中，统计每种职称的任职人数，并用GROUP_CONCAT()函数显示每种职称的教师姓名,并筛选出任职人数多于100的记录。
+SELECT ttitle,COUNT(*)'TTitle',GROUP_CONCAT(tname)'Tname'
+FROM t
+GROUP BY ttitle
+HAVING COUNT(*)>100;
+19.   查询专业编号非空的学生的学号、姓名、性别、年龄和专业号，查询结果按专业号升序排列，同一专业中的学生按年龄降序排列。
+SELECT snum,sname,ssex,(extract(year from current_date)-extract(year from sbirth)) 'sage',dnum
+FROM s
+WHERE dnum IS NOT NULL
+ORDER BY dnum,sage DESC;
+20.   查询所有教师的工号、姓名和年薪（工资乘以12），并将年薪列命名为annual_salary,如果工资为NULL，则按6000计算年薪。
+SELECT tnum,tname,(IFNULL(tsalary,6000)*12 )'annual_salary'
+FROM t;
+
