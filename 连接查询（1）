@@ -1,1 +1,88 @@
+1.查询所有学生的姓名、选修的课程名和相应的学分,并按学生姓名升序,学分降序排列。
+SELECT sname,cname,credit 
+FROM s,c,sc
+WHERE s.snum=sc.snum AND c.cnum=sc.cnum
+ORDER BY sname,credit DESC ;
 
+2.查询选修了'数据库原理与技术'并且成绩在90分以上的学生的学号和姓名。
+SELECT s.snum,sname
+FROM s,c,sc 
+WHERE s.snum=sc.snum AND
+ c.cname='数据库原理与技术' AND sc.score>90 AND c.cnum=sc.cnum;
+ 
+3.查询每个学院名称、该学院的教师姓名和教师的授课名称,并按学院名称排序。
+SELECT coll.collname,t.tname,c.cname
+FROM t,coll,tc,c
+WHERE t.collnum=coll.collnum AND t.tnum=tc.tnum AND tc.cnum=c.cnum
+ORDER BY collname;
+
+4.查询每个学生的学号、姓名、专业名称和所在学院名称
+SELECT s.snum,sname,d.dname,coll.collname
+FROM s,d,coll
+WHERE s.dnum=d.dnum AND d.collnum=coll.collnum;
+
+5.查询工资高于'刘小林'的所有教师的姓名、职称和工资。
+SELECT first.tname,first.degree,first.tsalary 
+FROM t first,t second
+WHERE first.tsalary>second.tsalary AND second.tname='刘小林';
+
+6.查询与'朱强'在同一个专业学习的学生姓名和性别。
+SELECT s1.sname,s1.ssex
+FROM s s1,s s2
+WHERE s1.dnum=s2.dnum AND s2.sname='朱强';
+
+7.查询同一出生日期的教师对。(显示教师A和教师B的姓名及出生日期，避免重复组合)
+并按出生日期排序。
+SELECT t1.tname'教师A',t2.tname'教师B',t1.tbirth
+FROM t t1,t t2
+WHERE t1.tbirth>t2.tbirth AND t1.tnum<t2.tnum 
+ORDER BY t1.tbirth;
+
+8.查询所有学院名称及其专业名称,包括没有专业的学院
+SELECT coll.collname,d.dname 
+FROM coll LEFT JOIN d ON (coll.collnum=d.collnum);
+
+9.查询所有学生姓名及其选修课程名和成绩，包括没有选课的学生
+SELECT s.sname,c.cname,sc.score
+FROM s LEFT JOIN sc ON(s.snum=sc.snum ) LEFT JOIN c ON( c.cnum=sc.cnum);
+
+10.统计各学院的学生人数,显示各学院的学院名称和学生人数,并按学生人数降序排列。
+SELECT collname,COUNT(*)
+FROM coll,s,d
+WHERE coll.collnum=d.collnum AND d.dnum=s.dnum
+GROUP BY collname
+ORDER BY COUNT(*) DESC;
+
+11.统计每门课程的选修人数和平均成绩,显示课程号，课程名，人数和平均成绩,并按选课人数降序排列。111111
+SELECT c.cnum,c.cname,COUNT(snum),AVG(score)
+FROM sc,c 
+WHERE sc.cnum=c.cnum
+GROUP BY c.cnum,c.cname 
+ORDER BY COUNT(snum) DESC;
+
+12.按平均工资从高到低的顺序分别列出每个学院（学院名称）的各种职称（非空）的人数和平均工资。
+SELECT coll.collname,t.ttitle,AVG(t.tsalary),COUNT(t.tnum)
+FROM coll,t
+WHERE t.collnum=coll.collnum AND t.ttitle IS NOT NULL
+GROUP BY coll.collnum,t.ttitle 
+ORDER BY AVG(t.tsalary) DESC;
+
+13.查询'应用统计学'专业选修课程的最低成绩大于80分的学生的学号,姓名和最低成绩。
+SELECT s.snum,s.sname,MIN(sc.score)'最低成绩'
+FROM s 
+JOIN d ON s.dnum=d.dnum
+JOIN sc ON s.snum=sc.snum
+WHERE d.dname LIKE '%应用统计学%' 
+GROUP BY s.snum,s.sname
+HAVING MIN(sc.score)>80;
+
+14.查询选修了'C01'号课程的学生姓名,选修的课程名和成绩，按成绩对学生进行排名。(使用RANK()) 
+SELECT s.sname,c.cname,sc.score,RANK() OVER(ORDER BY sc.score  )
+FROM s,sc,c
+WHERE s.snum=sc.snum AND sc.cnum=c.cnum AND sc.cnum='c01'
+
+15.统计各学院各专业的学生人数，显示学院名称,专业名称和学生人数，并显示小计和总计。(使用WITH ROLLUP)
+SELECT COUNT(s.snum)'统计人数',coll.collname,d.dname
+FROM s,d,coll
+WHERE s.dnum = d.dnum AND d.collnum = coll.collnum
+GROUP BY coll.collname,d.dname WITH ROLLUP;
